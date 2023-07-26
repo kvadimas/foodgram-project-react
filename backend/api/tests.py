@@ -1,3 +1,14 @@
-from django.test import TestCase
+from http import HTTPStatus
 
-# Create your tests here.
+from api import models
+from django.test import Client, TestCase
+
+
+class TaskiAPITestCase(TestCase):
+    def setUp(self):
+        self.guest_client = Client()
+
+    def test_api_exists(self):
+        """Проверка доступности api."""
+        response = self.guest_client.get('/api/')
+        self.assertEqual(response.status_code, HTTPStatus.OK)
