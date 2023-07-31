@@ -6,7 +6,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,24 +14,69 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Tag',
+            name="Tag",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Название')),
-                ('color', models.CharField(max_length=7, unique=True, verbose_name='Цвет в HEX')),
-                ('slug', models.SlugField(max_length=200, unique=True, verbose_name='Уникальный слаг')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Название")),
+                (
+                    "color",
+                    models.CharField(
+                        max_length=7, unique=True, verbose_name="Цвет в HEX"
+                    ),
+                ),
+                (
+                    "slug",
+                    models.SlugField(
+                        max_length=200, unique=True, verbose_name="Уникальный слаг"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Recipe',
+            name="Recipe",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, verbose_name='Название')),
-                ('image', models.CharField(blank=True, max_length=200, null=True, verbose_name='Ссылка на картинку на сайте')),
-                ('text', models.CharField(max_length=200, verbose_name='Описание')),
-                ('cooking_time', models.PositiveIntegerField(verbose_name='Время приготовления (в минутах)')),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('tegs', models.ManyToManyField(to='recipes.Tag')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Название")),
+                (
+                    "image",
+                    models.CharField(
+                        blank=True,
+                        max_length=200,
+                        null=True,
+                        verbose_name="Ссылка на картинку на сайте",
+                    ),
+                ),
+                ("text", models.CharField(max_length=200, verbose_name="Описание")),
+                (
+                    "cooking_time",
+                    models.PositiveIntegerField(
+                        verbose_name="Время приготовления (в минутах)"
+                    ),
+                ),
+                (
+                    "author",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                ("tegs", models.ManyToManyField(to="recipes.Tag")),
             ],
         ),
     ]

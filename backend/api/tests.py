@@ -9,5 +9,5 @@ class TaskiAPITestCase(TestCase):
 
     def test_api_exists(self):
         """Проверка доступности api."""
-        response = self.guest_client.get('/api/')
+        response = self.guest_client.get("/api/")
         self.assertEqual(response.status_code, HTTPStatus.OK)
