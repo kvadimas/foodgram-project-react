@@ -116,11 +116,26 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
 }
 
 DJOSER = {
+    'HIDE_USERS': False,
     'LOGIN_FIELD': 'email',
+    'SERIALIZERS': {
+        'user': 'users.serializers.UserSerializer',
+        'user_create': 'users.serializers.UserCreateSerializer',
+        'current_user': 'users.serializers.UserSerializer',
+    },
+    
 }
+
+AUTH_USER_MODEL = 'users.User'
