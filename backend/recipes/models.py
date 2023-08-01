@@ -14,7 +14,12 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    tegs = models.ManyToManyField(
+    ingredients = models.ManyToManyField(
+        "Ingredient",
+        through="RecipeIngredient",
+        through_fields=("recipe", "ingredient"),
+    )
+    tags = models.ManyToManyField(
         Tag,
     )
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -23,11 +28,8 @@ class Recipe(models.Model):
         "Ссылка на картинку на сайте", max_length=200, blank=True, null=True
     )
     text = models.CharField("Описание", max_length=200)
-    cooking_time = models.PositiveIntegerField("Время приготовления (в минутах)")
-    ingredients = models.ManyToManyField(
-        "Ingredient",
-        through="RecipeIngredient",
-        through_fields=("recipe", "ingredient"),
+    cooking_time = models.PositiveIntegerField(
+        "Время приготовления (в минутах)"
     )
 
 
