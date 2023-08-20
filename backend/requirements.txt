@@ -10,3 +10,4 @@ typing_extensions==4.7.1
 psycopg2-binary==2.9.3
 pillow
 djoser
+reportlab

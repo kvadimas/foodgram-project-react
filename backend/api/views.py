@@ -11,7 +11,7 @@ from api.serializers import (
     RecipeCreateSerializer,
     RecipeShortSerializer
 )
-from recipes.models import Recipe, Tag, Ingredient, Favorite
+from recipes.models import (Recipe, Tag, Ingredient, Favorite, ShoppingCart)
 
 
 class TagViewSet(ModelViewSet):
@@ -21,7 +21,6 @@ class TagViewSet(ModelViewSet):
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
         from django.db import connection
-
         print(len(connection.queries))
         for q in connection.queries:
             print(">>>>", q["sql"])
@@ -75,6 +74,28 @@ class RecipeViewSet(ModelViewSet):
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(
+        detail=True,
+        methods=['post', 'delete']
+    )
+    def shopping_cart(self, request, pk):
+        user = self.request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        serializer = RecipeShortSerializer(recipe)
+        if request.method == 'POST':
+            ShoppingCart.objects.create(
+                recipe=recipe,
+                user=user
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        elif request.method == 'DELETE':
+            favorite = ShoppingCart.objects.filter(
+                user=user,
+                recipe=recipe
+            )
+            favorite.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
         from django.db import connection
@@ -92,7 +113,6 @@ class IngredientViewSet(ModelViewSet):
         # print(request)
         res = super().dispatch(request, *args, **kwargs)
         from django.db import connection
-
         print(len(connection.queries))
         for q in connection.queries:
             print(">>>>", q["sql"])
