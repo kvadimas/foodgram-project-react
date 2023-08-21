@@ -1,8 +1,11 @@
+from django.db.models import Sum
+from django.http import HttpResponse
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
+from termcolor import colored
 
 from api.serializers import (
     RecipeShowSerializer,
@@ -11,7 +14,14 @@ from api.serializers import (
     RecipeCreateSerializer,
     RecipeShortSerializer
 )
-from recipes.models import (Recipe, Tag, Ingredient, Favorite, ShoppingCart)
+from recipes.models import (
+    Recipe,
+    Tag,
+    Ingredient,
+    Favorite,
+    ShoppingCart,
+    RecipeIngredient
+)
 
 
 class TagViewSet(ModelViewSet):
@@ -95,6 +105,28 @@ class RecipeViewSet(ModelViewSet):
             )
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['GET'])
+    def download_shopping_cart(self, request):
+        print(colored('download_shopping_cart', 'red'))
+        ingredients = RecipeIngredient.objects.filter(
+            recipe__shoppingcart__user=request.user
+        ).order_by('ingredient__name').values(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(amount=Sum('amount'))
+        print(colored('add ingredients', 'red'))
+
+        shopping_list = 'Купить в магазине:'
+        for ingredient in ingredients:
+            shopping_list += (
+                f"\n{ingredient['ingredient__name']} "
+                f"({ingredient['ingredient__measurement_unit']}) - "
+                f"{ingredient['amount']}"
+                ",\n")
+        file = 'shopping_list'
+        response = HttpResponse(shopping_list, 'Content-Type: application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{file}.pdf"'
+        return response
 
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
