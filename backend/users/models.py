@@ -4,7 +4,8 @@ from django.db import models
 
 
 class User(AbstractUser):
-    """ Модель User. """
+    """Модель User."""
+
     username = models.CharField(
         verbose_name="Имя пользователя",
         max_length=150,
@@ -47,23 +48,24 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
-    """ Модель подписки. """
+    """Модель подписки."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор',
-        related_name='follower',
+        verbose_name="Автор",
+        related_name="follower",
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Подписчик',
-        related_name='following'
+        verbose_name="Подписчик",
+        related_name="following",
     )
 
     class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
 
     def __str__(self) -> str:
         return f"{self.user} подписан на {self.author}"

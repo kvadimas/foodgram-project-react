@@ -6,7 +6,9 @@ SECRET_KEY = "django-insecure-4553qma(-qs)i4c!*5#49f&720z2y71r7d--8r%far8)m!$0uf
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*',]
+ALLOWED_HOSTS = [
+    "*",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -137,8 +139,8 @@ DJOSER = {
 
 AUTH_USER_MODEL = "users.User"
 
-STATIC_URL = '/static_backend/'
-STATIC_ROOT = BASE_DIR / 'static_backend' 
+STATIC_URL = "/static_backend/"
+STATIC_ROOT = BASE_DIR / "static_backend"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media/'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media/"
