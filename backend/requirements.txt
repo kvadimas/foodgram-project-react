@@ -11,3 +11,7 @@ psycopg2-binary==2.9.3
 pillow
 djoser
 reportlab
+pre-commit
+black
+flake8
+mypy
