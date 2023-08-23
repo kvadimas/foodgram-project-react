@@ -5,7 +5,6 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from termcolor import colored
 
 from api.serializers import (
     RecipeShowSerializer,
@@ -62,11 +61,9 @@ class RecipeViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(
-        detail=True,
-        methods=['post', 'delete']
-    )
+    @action(detail=True, methods=['post', 'delete'])
     def favorite(self, request, pk):
+        """Добавить, удалить в избранное."""
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
         serializer = RecipeShortSerializer(recipe)
@@ -84,11 +81,9 @@ class RecipeViewSet(ModelViewSet):
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(
-        detail=True,
-        methods=['post', 'delete']
-    )
+    @action(detail=True, methods=['post', 'delete'])
     def shopping_cart(self, request, pk):
+        """Добавить, удалить лист покупок."""
         user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
         serializer = RecipeShortSerializer(recipe)
@@ -108,13 +103,12 @@ class RecipeViewSet(ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
-        print(colored('download_shopping_cart', 'red'))
+        """Скачать лист покупок."""
         ingredients = RecipeIngredient.objects.filter(
             recipe__shoppingcart__user=request.user
         ).order_by('ingredient__name').values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(amount=Sum('amount'))
-        print(colored('add ingredients', 'red'))
 
         shopping_list = 'Купить в магазине:'
         for ingredient in ingredients:
@@ -142,14 +136,9 @@ class IngredientViewSet(ModelViewSet):
     serializer_class = IngredientSerializer
 
     def dispatch(self, request, *args, **kwargs):
-        # print(request)
         res = super().dispatch(request, *args, **kwargs)
         from django.db import connection
         print(len(connection.queries))
         for q in connection.queries:
             print(">>>>", q["sql"])
         return res
-
-
-
-

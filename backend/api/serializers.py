@@ -1,5 +1,5 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from rest_framework import serializers, exceptions, status
 from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (
@@ -10,8 +10,46 @@ from recipes.models import (
     Favorite,
     ShoppingCart
 )
-from users.serializers import UserSerializer
+from users.models import Follow
 from rest_framework.exceptions import ValidationError
+
+User = get_user_model()
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели User."""
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed"
+        )
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if request.user.is_anonymous:
+            return False
+        return Follow.objects.filter(user=request.user, author=obj).exists()
+
+
+class CustomCreateUserSerializer(serializers.ModelSerializer):
+    """ Сериализатор создания пользователя. """
+
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name"
+        ]
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -35,7 +73,7 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeShowSerializer(serializers.ModelSerializer):
     """ Сериализатор показа модели рецепта. """
     tags = TagSerializer(many=True)
-    author = UserSerializer(many=False)
+    author = CustomUserSerializer(many=False)
     ingredients = RecipeIngredientSerializer(
         many=True,
         source="recipeingredient_set"
@@ -75,7 +113,7 @@ class IngredientsRecipeCreateSerializer(serializers.ModelSerializer):
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     """ Сериализатор записи рецепта. """
-    author = UserSerializer(read_only=True)
+    author = CustomUserSerializer(read_only=True)
     ingredients = IngredientsRecipeCreateSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
@@ -158,6 +196,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
+    """ Сокращенный сериализатор рецепта. """
     image = Base64ImageField()
 
     class Meta:
@@ -168,3 +207,50 @@ class RecipeShortSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time'
         )
+
+
+class FollowSerializer(CustomUserSerializer):
+    """ Сериализатор для получения подписок """
+    recipes_count = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+
+    class Meta(CustomUserSerializer.Meta):
+        fields = (
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes_count",
+            "recipes"
+        )
+        read_only_fields = ('email', 'username')
+
+    def validate(self, data):
+        print("Start validate")
+        author = self.instance
+        user = self.context.get('request').user
+        if Follow.objects.filter(author=author, user=user).exists():
+            raise exceptions.ValidationError(
+                detail='Вы уже подписаны на этого пользователя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        if user == author:
+            raise exceptions.ValidationError(
+                detail='Вы не можете подписаться на самого себя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        return data
+
+    def get_recipes_count(self, obj):
+        return Recipe.objects.filter(author=obj).count()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        recipes = Recipe.objects.filter(author=obj)
+        if limit:
+            recipes = recipes[:int(limit)]
+        serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
+        return serializer.data
