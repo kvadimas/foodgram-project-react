@@ -1,20 +1,30 @@
+from api.serializers import (
+    IngredientSerializer,
+    RecipeCreateSerializer,
+    RecipeShortSerializer,
+    RecipeShowSerializer,
+    TagSerializer,
+)
 from django.db import connection, models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
-                             RecipeShortSerializer, RecipeShowSerializer,
-                             TagSerializer)
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
-
 
 class TagViewSet(ModelViewSet):
     """Вьсет модели Tag"""
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
@@ -27,6 +37,7 @@ class TagViewSet(ModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     """Вьсет модели Recipe"""
+
     queryset = Recipe.objects.prefetch_related(
         "recipeingredient_set__ingredient", "tags", "author"
     ).all()
@@ -82,9 +93,7 @@ class RecipeViewSet(ModelViewSet):
     def download_shopping_cart(self, request):
         """Скачать лист покупок."""
         ingredients = (
-            RecipeIngredient.objects.filter(
-                recipe__shoppingcart__user=request.user
-            )
+            RecipeIngredient.objects.filter(recipe__shoppingcart__user=request.user)
             .order_by("ingredient__name")
             .values("ingredient__name", "ingredient__measurement_unit")
             .annotate(amount=models.Sum("amount"))
@@ -111,6 +120,7 @@ class RecipeViewSet(ModelViewSet):
 
 class IngredientViewSet(ModelViewSet):
     """Вьсет модели Ingredient"""
+
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
 

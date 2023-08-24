@@ -1,7 +1,6 @@
 import json
 
 from django.apps import apps
-
 from recipes.management.commands.import_csv import MyBaseCommand
 
 
@@ -16,18 +15,14 @@ class Command(MyBaseCommand):
             _model = apps.get_model(_app, _name)
         except:
             self.stdout.write(
-                self.style.WARNING(
-                    "Ошибка при добавлении аргументов импорта модели"
-                )
+                self.style.WARNING("Ошибка при добавлении аргументов импорта модели")
             )
             return
 
         if options["delete_existing"]:
             _model.objects.all().delete()
             self.stdout.write(
-                self.style.WARNING(
-                    f"Таблица {_name} очищена от старых записей."
-                )
+                self.style.WARNING(f"Таблица {_name} очищена от старых записей.")
             )
 
         if options["file_path"]:

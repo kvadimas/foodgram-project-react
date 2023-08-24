@@ -13,7 +13,7 @@ class MyBaseCommand(BaseCommand):
             action="store_true",
             dest="delete_existing",
             default=False,
-            help="Удалить существующие записи в таблице перед созданием новых"
+            help="Удалить существующие записи в таблице перед созданием новых",
         )
         parser.add_argument(
             "-p" "--path",
@@ -47,18 +47,14 @@ class Command(MyBaseCommand):
             _model = apps.get_model(_app, _name)
         except:
             self.stdout.write(
-                self.style.WARNING(
-                    "Ошибка при добавлении аргументов импорта модели"
-                )
+                self.style.WARNING("Ошибка при добавлении аргументов импорта модели")
             )
             return
 
         if options["delete_existing"]:
             _model.objects.all().delete()
             self.stdout.write(
-                self.style.WARNING(
-                    f"Таблица {_name} очищена от старых записей."
-                )
+                self.style.WARNING(f"Таблица {_name} очищена от старых записей.")
             )
 
         if options["file_path"]:

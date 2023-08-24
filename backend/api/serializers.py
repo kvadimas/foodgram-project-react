@@ -1,11 +1,16 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 from rest_framework import exceptions, serializers, status
 from rest_framework.exceptions import ValidationError
-
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
 from users.models import Follow
 
 User = get_user_model()
@@ -18,14 +23,7 @@ class CustomUserSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = (
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed"
-        )
+        fields = ("email", "id", "username", "first_name", "last_name", "is_subscribed")
 
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
@@ -36,43 +34,34 @@ class CustomUserSerializer(UserSerializer):
 
 class CustomCreateUserSerializer(UserCreateSerializer):
     """Сериализатор создания пользователя."""
+
     password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
-        fields = (
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name"
-        )
+        fields = ("email", "id", "username", "first_name", "last_name")
 
     def validate_username(self, value):
         if value == "me":
-            raise ValidationError(
-                f"Имя пользователя {value} не разрешено."
-            )
+            raise ValidationError(f"Имя пользователя {value} не разрешено.")
         return value
 
     def create(self, validated_data):
         """Создание пользователя, необходим для корректой записи password."""
         user = User(
-            email=validated_data['email'],
-            username=validated_data['username'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
+            email=validated_data["email"],
+            username=validated_data["username"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
         )
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data["password"])
         user.save()
         return user
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="ingredient.name")
-    measurement_unit = serializers.CharField(
-        source="ingredient.measurement_unit"
-    )
+    measurement_unit = serializers.CharField(source="ingredient.measurement_unit")
     id = serializers.ReadOnlyField(source="ingredient.id")
 
     class Meta:
@@ -82,6 +71,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор модели тегов."""
+
     class Meta:
         model = Tag
         fields = "__all__"
@@ -92,10 +82,7 @@ class RecipeShowSerializer(serializers.ModelSerializer):
 
     tags = TagSerializer(many=True)
     author = CustomUserSerializer(many=False)
-    ingredients = RecipeIngredientSerializer(
-        many=True,
-        source="recipeingredient_set"
-    )
+    ingredients = RecipeIngredientSerializer(many=True, source="recipeingredient_set")
     image = Base64ImageField()
     is_favorite = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
@@ -108,19 +95,13 @@ class RecipeShowSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if not request.user.is_authenticated:
             return False
-        return Favorite.objects.filter(
-            user=request.user,
-            recipe=obj
-        ).exists()
+        return Favorite.objects.filter(user=request.user, recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get("request")
         if not request.user.is_authenticated:
             return False
-        return ShoppingCart.objects.filter(
-            user=request.user,
-            recipe=obj
-        ).exists()
+        return ShoppingCart.objects.filter(user=request.user, recipe=obj).exists()
 
 
 class IngredientsRecipeCreateSerializer(serializers.ModelSerializer):
@@ -139,10 +120,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     author = CustomUserSerializer(read_only=True)
     ingredients = IngredientsRecipeCreateSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(),
-        many=True
-    )
+    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
     image = Base64ImageField()
 
     class Meta:
@@ -165,9 +143,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         tags_list = []
         for tag in tags:
             if tag in tags_list:
-                raise ValidationError(
-                    {"tags": "Теги должны быть уникальными!"}
-                )
+                raise ValidationError({"tags": "Теги должны быть уникальными!"})
             tags_list.append(tag)
         return value
 
