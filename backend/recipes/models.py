@@ -37,7 +37,9 @@ class Recipe(models.Model):
         null=True,
     )
     text = models.CharField("Описание", max_length=200)
-    cooking_time = models.PositiveIntegerField("Время приготовления (в минутах)")
+    cooking_time = models.PositiveIntegerField(
+        "Время приготовления (в минутах)"
+    )
 
     def __str__(self):
         return f"{self.name}"
