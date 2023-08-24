@@ -5,6 +5,7 @@ django-filter==23.1
 djangorestframework==3.12.4
 djangorestframework-simplejwt==5.2.2
 djoser
+drf-extra-fields==3.6.1
 flake8
 mypy
 pillow
