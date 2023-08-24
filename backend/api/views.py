@@ -1,40 +1,32 @@
-from api.serializers import (
-    IngredientSerializer,
-    RecipeCreateSerializer,
-    RecipeShortSerializer,
-    RecipeShowSerializer,
-    TagSerializer,
-)
 from django.db import connection, models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    ShoppingCart,
-    Tag,
-)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
+                             RecipeShortSerializer, RecipeShowSerializer,
+                             TagSerializer)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
+
 
 class TagViewSet(ModelViewSet):
+    """Вьсет модели Tag"""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
     def dispatch(self, request, *args, **kwargs):
-        res = super().dispatch(request, *args, **kwargs)
-        print(len(connection.queries))
+        print("Tag", len(connection.queries))
         for q in connection.queries:
             print(">>>>", q["sql"])
-        return res
+        return super().dispatch(request, *args, **kwargs)
 
 
 class RecipeViewSet(ModelViewSet):
+    """Вьсет модели Recipe"""
     queryset = Recipe.objects.prefetch_related(
         "recipeingredient_set__ingredient", "tags", "author"
     ).all()
@@ -65,10 +57,11 @@ class RecipeViewSet(ModelViewSet):
         if request.method == "POST":
             Favorite.objects.create(recipe=recipe, user=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == "DELETE":
+        if request.method == "DELETE":
             favorite = Favorite.objects.filter(user=user, recipe=recipe)
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        return None
 
     @action(detail=True, methods=["post", "delete"])
     def shopping_cart(self, request, pk):
@@ -79,21 +72,23 @@ class RecipeViewSet(ModelViewSet):
         if request.method == "POST":
             ShoppingCart.objects.create(recipe=recipe, user=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == "DELETE":
+        if request.method == "DELETE":
             favorite = ShoppingCart.objects.filter(user=user, recipe=recipe)
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        return None
 
     @action(detail=False, methods=["GET"])
     def download_shopping_cart(self, request):
         """Скачать лист покупок."""
         ingredients = (
-            RecipeIngredient.objects.filter(recipe__shoppingcart__user=request.user)
+            RecipeIngredient.objects.filter(
+                recipe__shoppingcart__user=request.user
+            )
             .order_by("ingredient__name")
             .values("ingredient__name", "ingredient__measurement_unit")
             .annotate(amount=models.Sum("amount"))
         )
-
         shopping_list = "Купить в магазине:"
         for ingredient in ingredients:
             shopping_list += (
@@ -108,20 +103,19 @@ class RecipeViewSet(ModelViewSet):
         return response
 
     def dispatch(self, request, *args, **kwargs):
-        res = super().dispatch(request, *args, **kwargs)
-        print(len(connection.queries))
+        print("Recipe", len(connection.queries))
         for q in connection.queries:
             print(">>>>", q["sql"])
-        return res
+        return super().dispatch(request, *args, **kwargs)
 
 
 class IngredientViewSet(ModelViewSet):
+    """Вьсет модели Ingredient"""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
 
     def dispatch(self, request, *args, **kwargs):
-        res = super().dispatch(request, *args, **kwargs)
-        print(len(connection.queries))
+        print("Ingredient", len(connection.queries))
         for q in connection.queries:
             print(">>>>", q["sql"])
-        return res
+        return super().dispatch(request, *args, **kwargs)

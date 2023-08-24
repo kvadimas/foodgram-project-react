@@ -14,6 +14,10 @@ class Tag(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+
 
 class Recipe(models.Model):
     """Рецепт."""
@@ -33,10 +37,16 @@ class Recipe(models.Model):
         null=True,
     )
     text = models.CharField("Описание", max_length=200)
-    cooking_time = models.PositiveIntegerField("Время приготовления (в минутах)")
+    cooking_time = models.PositiveIntegerField(
+        "Время приготовления (в минутах)"
+    )
 
     def __str__(self):
         return f"{self.name}"
+
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
 
 
 class Ingredient(models.Model):
@@ -47,6 +57,10 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.measurement_unit}"
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
 
 class RecipeIngredient(models.Model):

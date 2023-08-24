@@ -11,9 +11,10 @@ class User(AbstractUser):
         max_length=150,
         unique=True,
         blank=False,
+        null=False,
         validators=[UnicodeUsernameValidator()],
         error_messages={
-            "unique": "username уже занят.",
+            "unique": "Такой username уже занят.",
         },
     )
     email = models.EmailField(
@@ -21,6 +22,7 @@ class User(AbstractUser):
         max_length=254,
         blank=False,
         unique=True,
+        null=False,
         error_messages={
             "unique": "Такой email уже зарегистрирован.",
         },

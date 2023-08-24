@@ -135,6 +135,10 @@ DJOSER = {
         "user_create": "api.serializers.CustomCreateUserSerializer",
         "current_user": "api.serializers.CustomUserSerializer",
     },
+    "PERMISSIONS": {
+        "user": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
+        "user_list": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
+    },
 }
 
 AUTH_USER_MODEL = "users.User"
