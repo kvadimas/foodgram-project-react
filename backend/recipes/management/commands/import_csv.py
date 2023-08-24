@@ -47,7 +47,7 @@ class Command(MyBaseCommand):
             _name = "Ingredient"
             _app = "recipes"
             _model = apps.get_model(_app, _name)
-        except:
+        except Exception:
             self.stdout.write(
                 self.style.WARNING(
                     "Ошибка при добавлении аргументов импорта модели"
