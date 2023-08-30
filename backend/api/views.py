@@ -17,7 +17,7 @@ from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
                              RecipeShortSerializer, RecipeShowSerializer,
                              TagSerializer, UserSerializer, FollowSerializer)
-from recipes.models import (Favorite, Ingredient, Recipe, 
+from recipes.models import (Favorite, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import Follow
 
@@ -100,7 +100,6 @@ class RecipeViewSet(ModelViewSet):
             object.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return None
-
 
     @action(detail=True, methods=["post", "delete"])
     def favorite(self, request, pk):

@@ -8,8 +8,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-123')
 
 DEBUG = os.getenv('DEBUG', default='False') == 'True'
 
-ALLOWED_HOSTS = os.getenv( 
-    'ALLOWED_HOSTS', 
+ALLOWED_HOSTS = os.getenv(
+    'ALLOWED_HOSTS',
     default='127.0.0.1 localhost'
 ).split()
 
