@@ -5,7 +5,6 @@ User = get_user_model()
 
 
 class Tag(models.Model):
-    """Тег."""
 
     name = models.CharField("Название", max_length=200)
     color = models.CharField("Цвет в HEX", max_length=7, unique=True)
@@ -20,7 +19,6 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    """Рецепт."""
 
     ingredients = models.ManyToManyField(
         "Ingredient",
@@ -50,7 +48,6 @@ class Recipe(models.Model):
 
 
 class Ingredient(models.Model):
-    """Ингредиент."""
 
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
@@ -64,7 +61,6 @@ class Ingredient(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    """Связь рецепта и ингредиента."""
 
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
@@ -72,14 +68,12 @@ class RecipeIngredient(models.Model):
 
 
 class RecipeTag(models.Model):
-    """Связь рецепта и тега."""
 
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
 
 class Favorite(models.Model):
-    """Избранное."""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)

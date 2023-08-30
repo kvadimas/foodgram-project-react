@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,6 +11,15 @@ ALLOWED_HOSTS = [
     "*",
 ]
 
+# SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-123')
+# 
+# DEBUG = os.getenv('DEBUG', default='False') == 'True'
+# 
+# ALLOWED_HOSTS = os.getenv( 
+#     'ALLOWED_HOSTS', 
+#     default='127.0.0.1 localhost'
+# ).split()
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -17,9 +27,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
+
     "api.apps.ApiConfig",
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
@@ -131,9 +143,9 @@ DJOSER = {
     "HIDE_USERS": False,
     "LOGIN_FIELD": "email",
     "SERIALIZERS": {
-        "user": "api.serializers.CustomUserSerializer",
-        "user_create": "api.serializers.CustomCreateUserSerializer",
-        "current_user": "api.serializers.CustomUserSerializer",
+        "user": "api.serializers.UserSerializer",
+        "user_create": "api.serializers.CreateUserSerializer",
+        "current_user": "api.serializers.UserSerializer",
     },
     "PERMISSIONS": {
         "user": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
