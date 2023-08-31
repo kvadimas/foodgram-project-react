@@ -27,7 +27,7 @@ services:
     volumes:
       - ../frontend/:/app/result_build/
 
-  nginx:
+  gateway:
     image: kvadimas/foodgram_gateway
     env_file: .env
     ports:
