@@ -175,7 +175,8 @@ class CastomUserViewSet(UserViewSet):
     def perform_create(self, serializer):
         serializer = CreateUserSerializer(data=self.request.data)
         if serializer.is_valid():
-            user = serializer.save()
+            serializer.save()
+        return None
 
     @action(
         detail=True,
