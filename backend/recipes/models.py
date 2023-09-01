@@ -34,7 +34,7 @@ class Recipe(models.Model):
         blank=True,
         null=True,
     )
-    text = models.CharField("Описание", max_length=200)
+    text = models.CharField("Описание", max_length=9000)
     cooking_time = models.PositiveIntegerField(
         "Время приготовления (в минутах)"
     )
