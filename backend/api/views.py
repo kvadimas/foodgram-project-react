@@ -14,7 +14,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api.pagination import CustomPagination
-from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
+from api.serializers import (CreateUserSerializer,
+                             IngredientSerializer, RecipeCreateSerializer,
                              RecipeShortSerializer, RecipeShowSerializer,
                              TagSerializer, UserSerializer, FollowSerializer)
 from recipes.models import (Favorite, Ingredient, Recipe,
@@ -170,6 +171,11 @@ class CastomUserViewSet(UserViewSet):
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
     pagination_class = CustomPagination
+
+    def perform_create(self, serializer):
+        serializer = CreateUserSerializer(data=self.request.data)
+        if serializer.is_valid():
+            user = serializer.save()
 
     @action(
         detail=True,

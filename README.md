@@ -1,13 +1,21 @@
 # Foodgram
+## Для ревьюера
+[Сайт](http://fieryshop.ru/)
+
+user: admin
+
+email: a@a.ru
+
+password: qwerty12345
 ## Описание
 Проект Foodgram - сайт, на котором пользователи будут публиковать рецепты,
 добавлять чужие рецепты в избранное и подписываться на публикации других
 авторов. Пользователям также будет доступна возможность скачать «Список
 покупок».
-## Установка
+## Установка local
 Склонировать репозиторий командой:
 ```
-git clone git@github.com:kvadimas/api_yamdb.git
+git clone git@github.com:kvadimas/foodgram-project-react.git
 ```
 Перейти в папку с проектом, установить виртуальное окружение и активировать его:
 ```
@@ -35,13 +43,10 @@ python3 manage.py migrate
 ```
 python3 manage.py runserver
 ```
-## Документация
-[Документация к API в формате Redoc.](http://127.0.0.1:8000/redoc/)
 ## Импорт csv
 Чтоб заполнить базу ингридеентами запустите:
 ```
 python3 manage.py import_csv
-python3 manage.py import_json
 ```
 или:
 ```
