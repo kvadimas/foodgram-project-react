@@ -1,14 +1,17 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-4553qma(-qs)i4c!*5#49f&720z2y71r7d--8r%far8)m!$0uf"
 
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-123')
 
-ALLOWED_HOSTS = [
-    "*",
-]
+DEBUG = os.getenv('DEBUG', default='False') == 'True'
+
+ALLOWED_HOSTS = os.getenv(
+    'ALLOWED_HOSTS',
+    default='127.0.0.1 localhost'
+).split()
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -17,9 +20,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
+
     "api.apps.ApiConfig",
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
@@ -59,22 +64,22 @@ WSGI_APPLICATION = "foodgram.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', default='django'),
+        'USER': os.getenv('POSTGRES_USER', default='django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default=''),
+        'HOST': os.getenv('DB_HOST', default='localhost'),
+        'PORT': os.getenv('DB_PORT', default=5432)
     }
 }
+
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'django'),
-#         'USER': os.getenv('POSTGRES_USER', 'django'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-#         'HOST': os.getenv('DB_HOST', ''),
-#         'PORT': os.getenv('DB_PORT', 5432)
-#     }
-# }
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",}}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -110,7 +115,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+MEDIA_URL = "media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -131,9 +140,9 @@ DJOSER = {
     "HIDE_USERS": False,
     "LOGIN_FIELD": "email",
     "SERIALIZERS": {
-        "user": "api.serializers.CustomUserSerializer",
-        "user_create": "api.serializers.CustomCreateUserSerializer",
-        "current_user": "api.serializers.CustomUserSerializer",
+        "user": "api.serializers.UserSerializer",
+        "user_create": "api.serializers.CreateUserSerializer",
+        "current_user": "api.serializers.UserSerializer",
     },
     "PERMISSIONS": {
         "user": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
@@ -142,9 +151,3 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = "users.User"
-
-STATIC_URL = "/static_backend/"
-STATIC_ROOT = BASE_DIR / "static_backend"
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media/"
