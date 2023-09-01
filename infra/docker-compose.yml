@@ -35,7 +35,7 @@ services:
     build:
       dockerfile: Dockerfile
     ports:
-      - 7000:80
+      - 7000:8000
     volumes:
       - static:/staticfiles/
       - media:/media
