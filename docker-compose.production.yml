@@ -33,7 +33,7 @@ services:
     image: kvadimas/foodgram_gateway
     env_file: .env
     ports:
-      - 8000:80
+      - 8000:9000
     volumes:
       - static:/staticfiles/
       - media:/media
