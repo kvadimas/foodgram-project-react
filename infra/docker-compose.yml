@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile
     env_file: ../.env
     volumes:
-      - static_front:/app/static/
+      - static:/app/static/
       - media:/app/media/
     depends_on:
       - db
@@ -27,7 +27,7 @@ services:
   frontend:
     build: ../frontend/
     volumes:
-      - static:/app/build/
+      - static_front:/app/build/
     depends_on:
       - backend
 
