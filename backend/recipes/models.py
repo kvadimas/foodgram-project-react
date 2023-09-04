@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from recipes.managers import RecipeManager
+
 User = get_user_model()
 
 
@@ -38,6 +40,7 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(
         "Время приготовления (в минутах)"
     )
+    objects = RecipeManager()
 
     def __str__(self):
         return f"{self.name}"

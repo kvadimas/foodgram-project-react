@@ -5,7 +5,7 @@ from djoser.serializers import (
     UserSerializer as DjoserUserSerializer
 )
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import exceptions, serializers, status
+from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
@@ -222,12 +222,10 @@ class FollowSerializer(UserSerializer):
         if Follow.objects.filter(author=author, user=user).exists():
             raise exceptions.ValidationError(
                 detail="Вы уже подписаны на этого пользователя!",
-                code=status.HTTP_400_BAD_REQUEST,
             )
         if user == author:
             raise exceptions.ValidationError(
                 detail="Вы не можете подписаться на самого себя!",
-                code=status.HTTP_400_BAD_REQUEST,
             )
         return data
 
