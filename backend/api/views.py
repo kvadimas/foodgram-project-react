@@ -1,12 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.db import connection, models
+from django.db import connection
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfbase import pdfmetrics, ttfonts
-from reportlab.pdfgen import canvas
 from rest_framework import filters, response, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -18,8 +14,8 @@ from api.serializers import (CreateUserSerializer,
                              IngredientSerializer, RecipeCreateSerializer,
                              RecipeShortSerializer, RecipeShowSerializer,
                              TagSerializer, UserSerializer, FollowSerializer)
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
+from api.services import get_shopping_list
+from recipes.models import (Favorite, Ingredient, Recipe, ShoppingCart, Tag)
 from users.models import Follow
 
 User = get_user_model()
@@ -54,26 +50,8 @@ class RecipeViewSet(ModelViewSet):
             ).all()
         else:
             queryset = self.queryset
-
         if user.is_authenticated:
-            # Аннотация к каждому объекту Recipe, указывающая,
-            # находится ли он в избранном текущего пользователя
-            favorites_subquery = Favorite.objects.filter(
-                user=user,
-                recipe=models.F("pk")
-            )
-
-            # Аннотация для проверки наличия объекта Recipe
-            # в корзине покупок текущего пользователя
-            shopping_cart_subquery = ShoppingCart.objects.filter(
-                user=user,
-                recipe=models.F("pk")
-            )
-
-            queryset = queryset.annotate(
-                is_favorite=models.Exists(favorites_subquery),
-                is_in_shopping_cart=models.Exists(shopping_cart_subquery)
-            )
+            queryset = Recipe.objects.with_favorite_and_shoppingcart(user)
         return queryset
 
     def get_serializer_class(self):
@@ -115,44 +93,10 @@ class RecipeViewSet(ModelViewSet):
     @action(detail=False, methods=["GET"])
     def download_shopping_cart(self, request):
         """Скачать лист покупок."""
-        ingredients = (
-            RecipeIngredient.objects.filter(
-                recipe__shoppingcart__user=request.user
-            )
-            .order_by("ingredient__name")
-            .values("ingredient__name", "ingredient__measurement_unit")
-            .annotate(amount=models.Sum("amount"))
-        )
-        shopping_list = "Купить в магазине:"
-        for ingredient in ingredients:
-            shopping_list += (
-                f"\n{ingredient['ingredient__name']} "
-                f"({ingredient['ingredient__measurement_unit']}) - "
-                f"{ingredient['amount']}"
-            )
-
-        # Временный файл PDF в памяти
-        buffer = BytesIO()
-        pdf = canvas.Canvas(buffer, pagesize=letter)
-
-        # Добавляем шрифт
-        dejavu_file = "fonts/DejaVuSans.ttf"
-        dejavu_font = ttfonts.TTFont("DejaVuSans", dejavu_file)
-        pdfmetrics.registerFont(dejavu_font)
-
-        # Добавление списка покупок на страницу PDF
-        x_offset = 50
-        y_offset = letter[1] - 100
-        pdf.setFont("DejaVuSans", 12)
-        for line in shopping_list.splitlines():
-            pdf.drawString(x_offset, y_offset, line)
-            y_offset -= 20
-
-        pdf.showPage()
-        pdf.save()
-        buffer.seek(0)
+        user = request.user
+        shopping_file = get_shopping_list(user)
         file = "shopping_list"
-        response = FileResponse(buffer, content_type="application/pdf")
+        response = FileResponse(shopping_file, content_type="application/pdf")
         response["Content-Disposition"] = f'attachment; filename="{file}.pdf"'
         return response
 
@@ -176,7 +120,6 @@ class CastomUserViewSet(UserViewSet):
         serializer = CreateUserSerializer(data=self.request.data)
         if serializer.is_valid():
             serializer.save()
-        return None
 
     @action(
         detail=True,

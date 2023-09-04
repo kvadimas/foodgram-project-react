@@ -4,13 +4,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-123')
+SECRET_KEY = os.getenv("SECRET_KEY", default="django-insecure-123")
 
-DEBUG = os.getenv('DEBUG', default='False') == 'True'
+DEBUG = os.getenv("DEBUG", default="False") == "True"
 
 ALLOWED_HOSTS = os.getenv(
-    'ALLOWED_HOSTS',
-    default='127.0.0.1 localhost'
+    "ALLOWED_HOSTS",
+    default="127.0.0.1 localhost"
 ).split()
 
 INSTALLED_APPS = [
@@ -75,11 +75,6 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', default=5432)
     }
 }
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",}}
 
 
 AUTH_PASSWORD_VALIDATORS = [
