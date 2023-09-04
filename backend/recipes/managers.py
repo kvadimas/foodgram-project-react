@@ -5,7 +5,6 @@ from django.db.models import Exists, OuterRef
 class RecipeManager(models.Manager):
     def with_favorite_and_shoppingcart(self, user):
         from recipes.models import Favorite, ShoppingCart
-        
         favorites_subquery = Favorite.objects.filter(
             user=user,
             recipe=OuterRef("pk")
