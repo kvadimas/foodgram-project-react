@@ -8,7 +8,9 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
 
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.serializers import (CreateUserSerializer,
                              IngredientSerializer, RecipeCreateSerializer,
@@ -41,6 +43,8 @@ class RecipeViewSet(ModelViewSet):
         "recipeingredient_set__ingredient", "tags"
     ).select_related("author").all().order_by("id")
     pagination_class = CustomPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RecipeFilter
 
     def get_queryset(self):
         user = self.request.user
@@ -106,6 +110,8 @@ class IngredientViewSet(ModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientFilter
 
 
 class CastomUserViewSet(UserViewSet):

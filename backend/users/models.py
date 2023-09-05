@@ -43,7 +43,7 @@ class User(AbstractUser):
         db_table = "auth_user"
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
-        ordering = ("username",)
+        ordering = ("id",)
 
     def __str__(self):
         return f"{self.username}"
