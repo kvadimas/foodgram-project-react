@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core import validators
 from django.db import models
 
 from recipes.managers import RecipeManager
@@ -39,7 +40,9 @@ class Recipe(models.Model):
     )
     text = models.CharField("Описание", max_length=9000)
     cooking_time = models.PositiveIntegerField(
-        "Время приготовления (в минутах)"
+        "Время приготовления (в минутах)",
+        validators=[validators.MinValueValidator(
+            1, message='Минимальное время приготовления 1 минута'), ]
     )
     objects = RecipeManager()
 

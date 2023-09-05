@@ -8,7 +8,8 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from recipes.models import (Ingredient, Recipe, RecipeIngredient, Tag,
+                            ShoppingCart, Favorite)
 from users.models import Follow
 
 User = get_user_model()
@@ -84,10 +85,36 @@ class RecipeShowSerializer(serializers.ModelSerializer):
         source="recipeingredient_set"
     )
     image = Base64ImageField()
+    is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.BooleanField(
+        read_only=True)
+
+    def check_item(self, obj, model):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return model.objects.filter(user=user, recipe=obj).exists()
+
+    def get_is_favorited(self, obj):
+        return self.check_item(obj, Favorite)
+
+    def get_is_in_shopping_cart(self, obj):
+        return self.check_item(obj, ShoppingCart)
 
     class Meta:
         model = Recipe
-        fields = "__all__"
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+        )
 
 
 class IngredientsRecipeCreateSerializer(serializers.ModelSerializer):
@@ -125,18 +152,27 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             "author",
         )
 
-    def validate_tags(self, value):
-        tags = value
-        if not tags:
-            raise ValidationError({"tags": "Нужно выбрать хотя бы один тег!"})
-        tags_list = []
-        for tag in tags:
-            if tag in tags_list:
+    def validate_items(self, value, item_type):
+        if not value:
+            raise ValidationError(
+                {item_type: f"Нужно выбрать хотя бы один {item_type}!"}
+            )
+
+        items_list = []
+        for item in value:
+            if item in items_list:
                 raise ValidationError(
-                    {"tags": "Теги должны быть уникальными!"}
+                    {item_type: f"{item_type.capitalize()} не уникальны!"}
                 )
-            tags_list.append(tag)
+            items_list.append(item)
+
         return value
+
+    def validate_ingredients(self, value):
+        return self.validate_items(value, item_type="ingredients")
+
+    def validate_tags(self, value):
+        return self.validate_items(value, item_type="tags")
 
     @transaction.atomic
     def create_ingredients_amounts(self, ingredients, recipe):
