@@ -8,7 +8,8 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from recipes.models import (Ingredient, Recipe, RecipeIngredient, Tag,
+                            ShoppingCart, Favorite)
 from users.models import Follow
 
 User = get_user_model()
@@ -84,10 +85,36 @@ class RecipeShowSerializer(serializers.ModelSerializer):
         source="recipeingredient_set"
     )
     image = Base64ImageField()
+    is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.BooleanField(
+        read_only=True)
+
+    def get_is_favorited(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return Favorite.objects.filter(user=user, recipe=obj).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
 
     class Meta:
         model = Recipe
-        fields = "__all__"
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+        )
 
 
 class IngredientsRecipeCreateSerializer(serializers.ModelSerializer):
@@ -124,6 +151,21 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             "ingredients",
             "author",
         )
+
+    def validate_ingredients(self, value):
+        ingredients = value
+        if not ingredients:
+            raise ValidationError(
+                {"ingredients": "Нужно выбрать хотя бы один ингредиент"}
+            )
+        ingredient_list = []
+        for i in ingredients:
+            if i in ingredient_list:
+                raise ValidationError(
+                    {"ingredients": "Ингредиенты должны быть уникальными!"}
+                )
+            ingredient_list.append(i)
+        return value
 
     def validate_tags(self, value):
         tags = value
