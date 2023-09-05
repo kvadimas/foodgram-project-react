@@ -18,6 +18,7 @@ class Tag(models.Model):
     class Meta:
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
+        ordering = ["name"]
 
 
 class Recipe(models.Model):
@@ -61,6 +62,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
+        ordering = ["name"]
 
 
 class RecipeIngredient(models.Model):
